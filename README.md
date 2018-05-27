@@ -1,53 +1,18 @@
-# Vim <-> Evince forward and backward search for vim-LaTeXSuite and VimTeX
+SyncTeX backwards search
+========================
 
-This plugin provides backwards and forward search between GVIM and [Evince](https://wiki.gnome.org/Apps/Evince).
+Example: `evince-synctex -v file.pdf -- gvim %f +%l`
 
-> Only works on GVIM at the moment.
+Launches Evince to `file.pdf`. If the LaTeX source was compiled with
+`--synctex=1`, then you can Ctrl-Click a word in Evince to launch GVim to the
+corresponding line in the source.
 
-# Installation
+You can pass a TeX source file to `-s` (`--build-source`)
+to run `latexmk --synctex=1 -pvc -view=none -pdf` on the source file,
+that is, to continuously build the source file in the background.
 
-Should work with standard plugin managers.
+Tip: If you want to run Vim in the terminal, continuously build the source file,
+and center the line in the Vim window when Vim is launched, use
+`evince-synctex -s file.tex -v file.pdf -- gnome-terminal --window -- vim %f +%l +'norm zz'`.
 
-## Requirements
-
-* Evince
-* Python 3
-* Python 2
-
-# Usage
-
-## [LatexSuite](https://github.com/vim-latex/vim-latex)
-
-```vim
-
-" compile your pdf with --synctex support:
-let g:Tex_CompileRule_pdf =
-      \ 'pdflatex --synctex=1 -interaction=nonstopmode -shell-escape "$*"'
-
-```
-
-Use `\ls` to forward search, use `Ctrl+Left Mouse` to backward search.
-
-## [VimTex](https://github.com/lervag/vimtex)
-
-```vim
-
-" Bind forward search (this command is provided by us)
-nnoremap <leader>lf :VimtexForwardSearch<CR>
-
-```
-
-Use `\lf` to forward search, use `Ctrl+Left Mouse` to backward search.
-
-# Resources and previous work
-
-evince_dbus.py:
- *  https://git.gnome.org/browse/gedit-plugins/tree/plugins/synctex/synctex/evince_dbus.py
-
-evince-backward-search:
- * https://forum.ubuntuusers.de/topic/evince-synctex-vim-emacs-scite-lyx-kile-editor/
-
-Other resources:
-* http://blog.wuzzeb.org/posts/2013-05-11-vim-latex-forward-search.html
-* http://tex.stackexchange.com/questions/29813/setup-synctex-with-emacs
-
+Based on [gauteh/vim-evince-synctex](https://github.com/gauteh/vim-evince-synctex).
