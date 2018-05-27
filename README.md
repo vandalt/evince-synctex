@@ -13,6 +13,7 @@ that is, to continuously build the source file in the background.
 
 Tip: If you want to run Vim in the terminal, continuously build the source file,
 and center the line in the Vim window when Vim is launched, use
-`evince_synctex.py -s file.tex -v file.pdf -- gnome-terminal --window -- vim %f +%l +'norm zz'`.
+`evince_synctex.py -s file.tex -v file.pdf -- gnome-terminal --window -- vim %f +%l +'norm zz'`,
+or simply run the included helper `latexedit file.tex`.
 
 Based on [gauteh/vim-evince-synctex](https://github.com/gauteh/vim-evince-synctex).
