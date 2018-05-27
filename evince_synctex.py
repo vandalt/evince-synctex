@@ -144,9 +144,24 @@ class EvinceWindowProxy:
         subprocess.call(cmd, shell=True)
 
 
-def main(source_file, pdf_file, cmdline):
-    logging.basicConfig(level=logging.DEBUG)
+def main(source_file=None, pdf_file=None, cmdline=None,
+         configure_logging=True):
     logger = logging.getLogger('evince_synctex')
+    if configure_logging:
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(logging.StreamHandler())
+
+    if not source_file and not pdf_file:
+        raise ValueError('Either source_file or pdf_file must be provided')
+
+    if not pdf_file:
+        pdf_file = os.path.splitext(source_file)[0] + '.pdf'
+
+    if not source_file:
+        source_file = os.path.splitext(pdf_file)[0] + '.tex'
+
+    if not cmdline:
+        cmdline = 'gvim %f +%l'.split()
 
     import dbus.mainloop.glib
     from gi.repository import GObject as gobject
@@ -170,7 +185,10 @@ def main(source_file, pdf_file, cmdline):
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         EvinceWindowProxy.instance = EvinceWindowProxy(
             pdf_url, cmdline_string, logger)
-        gobject.MainLoop().run()
+        try:
+            gobject.MainLoop().run()
+        except KeyboardInterrupt:
+            pass
         del EvinceWindowProxy.instance
     finally:
         if build_source_process:
