@@ -1,6 +1,8 @@
 SyncTeX backwards search
 ========================
 
+To install: `pip install --user https://github.com/Mortal/evince-synctex/archive/master.zip`
+
 Example: `evince_synctex.py -v file.pdf -- gvim %f +%l`
 
 Launches Evince to `file.pdf`. If the LaTeX source was compiled with
