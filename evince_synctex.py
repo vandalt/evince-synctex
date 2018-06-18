@@ -32,7 +32,10 @@ import argparse
 import subprocess
 import urllib.parse
 
-CONSOLE_SCRIPTS = ['latexedit = evince_synctex:latexedit']
+CONSOLE_SCRIPTS = [
+    'latexedit = evince_synctex:latexedit',
+    'evince-synctex = evince_synctex:main_parse',
+]
 
 parser = argparse.ArgumentParser(
     description=__doc__.lstrip(),
@@ -209,5 +212,9 @@ def latexedit():
     main(cmdline=latexedit_cmdline, **vars(latexedit_parser.parse_args()))
 
 
-if __name__ == '__main__':
+def main_parse():
     main(**vars(parser.parse_args()))
+
+
+if __name__ == '__main__':
+    main_parse()
