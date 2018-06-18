@@ -1,7 +1,7 @@
 SyncTeX backwards search
 ========================
 
-To install: `pip install --user https://github.com/Mortal/evince-synctex/archive/master.zip`
+To install: `pip3 install --user https://github.com/Mortal/evince-synctex/archive/master.zip`
 
 Example: `evince_synctex.py -v file.pdf -- gvim %f +%l`
 
