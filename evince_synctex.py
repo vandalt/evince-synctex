@@ -167,9 +167,6 @@ def main(source_file=None, pdf_file=None, cmdline=None,
     if not pdf_file:
         pdf_file = os.path.splitext(source_file)[0] + '.pdf'
 
-    if not source_file:
-        source_file = os.path.splitext(pdf_file)[0] + '.tex'
-
     if not cmdline:
         cmdline = 'gvim %f +%l'.split()
 
