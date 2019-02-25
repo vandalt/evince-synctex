@@ -33,7 +33,6 @@ import subprocess
 import urllib.parse
 
 CONSOLE_SCRIPTS = [
-    'latexedit = evince_synctex:latexedit',
     'evince-synctex = evince_synctex:main_parse',
 ]
 
@@ -49,11 +48,6 @@ parser.add_argument('-v', '--view-file', metavar='FILE', required=True,
                     help='Open Evince on FILE in synctex mode')
 parser.add_argument('cmdline', nargs='+',
                     help='Run command upon Ctrl+Click in Evince')
-
-latexedit_parser = argparse.ArgumentParser()
-latexedit_parser.add_argument('source_file')
-
-latexedit_cmdline = ['gnome-terminal', '--window', '--', 'vim', '%f', '+%l', '+norm zz']
 
 RUNNING, CLOSED = range(2)
 
@@ -203,10 +197,6 @@ def main(source_file=None, pdf_file=None, cmdline=None,
             build_source_process.wait()
         view_process.terminate()
         view_process.wait()
-
-
-def latexedit():
-    main(cmdline=latexedit_cmdline, **vars(latexedit_parser.parse_args()))
 
 
 def main_parse():
