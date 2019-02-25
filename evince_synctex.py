@@ -3,6 +3,7 @@
 # Copyright (C) 2010 Jose Aliste <jose.aliste@gmail.com>
 #               2011 Benjamin Kellermann <Benjamin.Kellermann@tu-dresden.de>
 #               2018 Mathias Rav <m@git.strova.dk>
+#               2019 Eric Förster <efoerster@users.noreply.github.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public Licence as published by the Free Software
@@ -19,7 +20,7 @@
 # Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 """
-Run Evince in SyncTeX mode while continuously building a TeX file.
+Provides SyncTeX support for Evince with any editor.
 """
 
 import os
@@ -40,9 +41,6 @@ parser = argparse.ArgumentParser(
     description=__doc__.lstrip(),
     formatter_class=argparse.RawDescriptionHelpFormatter,
 )
-parser.add_argument('-s', '--build-source', metavar='FILE',
-                    dest='source_file',
-                    help='Run latexmk to continuously build FILE')
 parser.add_argument('-v', '--view-file', metavar='FILE', required=True,
                     dest='pdf_file',
                     help='Open Evince on FILE in synctex mode')
@@ -148,18 +146,15 @@ class EvinceWindowProxy:
         subprocess.call(cmd, shell=True)
 
 
-def main(source_file=None, pdf_file=None, cmdline=None,
+def main(pdf_file=None, cmdline=None,
          configure_logging=True):
     logger = logging.getLogger('evince_synctex')
     if configure_logging:
         logger.setLevel(logging.DEBUG)
         logger.addHandler(logging.StreamHandler())
 
-    if not source_file and not pdf_file:
-        raise ValueError('Either source_file or pdf_file must be provided')
-
     if not pdf_file:
-        pdf_file = os.path.splitext(source_file)[0] + '.pdf'
+        raise ValueError('pdf_file must be provided')
 
     if not cmdline:
         cmdline = 'gvim %f +%l'.split()
@@ -172,15 +167,7 @@ def main(source_file=None, pdf_file=None, cmdline=None,
                            safe="%/:=&?~#+!$,;'@()*[]"))
     cmdline_string = ' '.join(map(shlex.quote, cmdline))
 
-    build_source_process = None
-    if source_file:
-        subprocess.check_call(
-            ('latexmk', '--synctex=1', '-pdf', source_file))
-        build_source_process = subprocess.Popen(
-            ('latexmk', '--synctex=1', '-pvc', '-view=none', '-pdf',
-             source_file))
-
-    view_process = subprocess.Popen(('evince', pdf_file))
+    process = subprocess.Popen(('evince', pdf_file))
 
     try:
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
@@ -192,11 +179,8 @@ def main(source_file=None, pdf_file=None, cmdline=None,
             pass
         del EvinceWindowProxy.instance
     finally:
-        if build_source_process:
-            build_source_process.terminate()
-            build_source_process.wait()
-        view_process.terminate()
-        view_process.wait()
+        process.terminate()
+        process.wait()
 
 
 def main_parse():
