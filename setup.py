@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from evince_synctex import __doc__ as DESCRIPTION, CONSOLE_SCRIPTS
+from evince_synctex import __doc__ as DESCRIPTION
 
 
 headline = DESCRIPTION.split('\n', 1)[0].rstrip('.')
@@ -7,16 +7,16 @@ headline = DESCRIPTION.split('\n', 1)[0].rstrip('.')
 
 setup(
     name='evince-synctex',
-    version='0.1',
+    version='0.1.0',
     description=headline,
     long_description=DESCRIPTION,
-    author='https://github.com/Mortal',
-    url='https://github.com/Mortal/evince-synctex',
+    author='https://github.com/efoerster',
+    url='https://github.com/efoerster/evince-synctex',
     py_modules=['evince_synctex'],
     include_package_data=True,
     license='GPLv3',
     entry_points={
-        'console_scripts': 'evince-synctex = evince_synctex:main',
+        'console_scripts': ['evince-synctex=evince_synctex:main'],
     },
     classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',

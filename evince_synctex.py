@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # Copyright (C) 2010 Jose Aliste <jose.aliste@gmail.com>
 #               2011 Benjamin Kellermann <Benjamin.Kellermann@tu-dresden.de>
@@ -189,10 +189,11 @@ def startEvince(line, pdf_file, editor_command):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.lstrip())
     parser.add_argument('-f', '--forward', type=int,
-                        dest='line', metavar='LINE')
-    parser.add_argument('pdf_file', metavar='PDF_FILE')
+                        dest='line', metavar='LINE', help='Performs a forward search with specified line number')
+    parser.add_argument('pdf_file', metavar='PDF_FILE',
+                        help='The PDF file to display')
     parser.add_argument('editor_command', metavar='EDITOR_COMMAND',
-                        help='Run command upon Ctrl+Click in Evince')
+                        help='The editor command to run on Ctrl+Click')
     startEvince(**vars(parser.parse_args()))
 
 
