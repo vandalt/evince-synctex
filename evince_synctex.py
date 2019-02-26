@@ -150,15 +150,20 @@ def startEvince(pdf_file, editor_script):
     pdf_uri = get_uri(pdf_file)
     process = subprocess.Popen(('evince', pdf_uri))
 
+    def poll_viewer_process():
+        process.poll()
+        if (process.returncode is not None):
+            exit(0)
+        return True
+
     try:
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         EvinceWindowProxy.instance = EvinceWindowProxy(
             pdf_uri, editor_command, logger)
-        try:
-            GLib.MainLoop().run()
-        except KeyboardInterrupt:
-            pass
-        del EvinceWindowProxy.instance
+        GLib.idle_add(poll_viewer_process)
+        GLib.MainLoop().run()
+    except KeyboardInterrupt:
+        pass
     finally:
         process.terminate()
         process.wait()
