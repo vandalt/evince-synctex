@@ -144,7 +144,7 @@ def startEvince(pdf_file, editor_script):
     logger.addHandler(logging.StreamHandler())
 
     import dbus.mainloop.glib
-    from gi.repository import GObject as gobject
+    from gi.repository import GLib
 
     editor_command = ' '.join(map(shlex.quote, editor_script))
     pdf_uri = get_uri(pdf_file)
@@ -155,7 +155,7 @@ def startEvince(pdf_file, editor_script):
         EvinceWindowProxy.instance = EvinceWindowProxy(
             pdf_uri, editor_command, logger)
         try:
-            gobject.MainLoop().run()
+            GLib.MainLoop().run()
         except KeyboardInterrupt:
             pass
         del EvinceWindowProxy.instance
