@@ -44,6 +44,14 @@ EVINCE_PATH = "/org/gnome/evince/Evince"
 EVINCE_IFACE = "org.gnome.evince.Application"
 
 EV_WINDOW_IFACE = "org.gnome.evince.Window"
+EV_WINDOW_PATH = "/org/gnome/evince/Window/0"
+
+
+def startEvinceDaemon():
+    bus = dbus.SessionBus()
+    daemon = bus.get_object(EV_DAEMON_NAME, EV_DAEMON_PATH,
+                            follow_name_owner_changes=True)
+    return (bus, daemon)
 
 
 class EvinceWindowProxy:
@@ -62,14 +70,9 @@ class EvinceWindowProxy:
         self.dbus_name = ''
         self._handler = None
         try:
-            if EvinceWindowProxy.bus is None:
-                EvinceWindowProxy.bus = dbus.SessionBus()
+            if (EvinceWindowProxy.daemon is None):
+                (EvinceWindowProxy.bus, EvinceWindowProxy.daemon) = startEvinceDaemon()
 
-            if EvinceWindowProxy.daemon is None:
-                EvinceWindowProxy.daemon = EvinceWindowProxy.bus.get_object(
-                    EV_DAEMON_NAME,
-                    EV_DAEMON_PATH,
-                    follow_name_owner_changes=True)
             EvinceWindowProxy.bus.add_signal_receiver(
                 self._on_doc_loaded,
                 signal_name="DocumentLoaded",
@@ -138,16 +141,31 @@ def get_uri(file):
     return 'file://%s' % (urllib.parse.quote(path, safe="%/:=&?~#+!$,;'@()*[]"))
 
 
-def startEvince(pdf_file, editor_script):
+def startEvince(line, pdf_file, editor_script):
     logger = logging.getLogger('evince_synctex')
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
 
     import dbus.mainloop.glib
     from gi.repository import GLib
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
-    editor_command = ' '.join(map(shlex.quote, editor_script))
     pdf_uri = get_uri(pdf_file)
+    (bus, daemon) = startEvinceDaemon()
+
+    already_opened = daemon.FindDocument(
+        pdf_uri, False, dbus_interface=EV_DAEMON_IFACE)
+
+    if (line is not None):
+        tex_file = os.path.splitext(pdf_file)[0] + '.tex'
+        dbus_name = daemon.FindDocument(
+            pdf_uri, True, dbus_interface=EV_DAEMON_IFACE)
+        window = bus.get_object(dbus_name, EV_WINDOW_PATH)
+        window.SyncView(tex_file, (line, 1), 0, dbus_interface=EV_WINDOW_IFACE)
+
+    if (already_opened):
+        return
+
     process = subprocess.Popen(('evince', pdf_uri))
 
     def poll_viewer_process():
@@ -156,8 +174,9 @@ def startEvince(pdf_file, editor_script):
             exit(0)
         return True
 
+    editor_command = ' '.join(map(shlex.quote, editor_script))
+
     try:
-        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         EvinceWindowProxy.instance = EvinceWindowProxy(
             pdf_uri, editor_command, logger)
         GLib.idle_add(poll_viewer_process)
@@ -171,6 +190,8 @@ def startEvince(pdf_file, editor_script):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.lstrip())
+    parser.add_argument('-f', '--forward', type=int,
+                        dest='line', metavar='LINE')
     parser.add_argument('pdf_file', metavar='PDF_FILE')
     parser.add_argument('editor_script', nargs='+', metavar='EDITOR_SCRIPT',
                         help='Run command upon Ctrl+Click in Evince')
