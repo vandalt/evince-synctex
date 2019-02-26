@@ -33,19 +33,6 @@ import argparse
 import subprocess
 import urllib.parse
 
-CONSOLE_SCRIPTS = [
-    'evince-synctex = evince_synctex:main_parse',
-]
-
-parser = argparse.ArgumentParser(
-    description=__doc__.lstrip(),
-    formatter_class=argparse.RawDescriptionHelpFormatter,
-)
-parser.add_argument('-v', '--view-file', metavar='FILE', required=True,
-                    dest='pdf_file',
-                    help='Open Evince on FILE in synctex mode')
-parser.add_argument('cmdline', nargs='+',
-                    help='Run command upon Ctrl+Click in Evince')
 
 RUNNING, CLOSED = range(2)
 
@@ -146,33 +133,27 @@ class EvinceWindowProxy:
         subprocess.call(cmd, shell=True)
 
 
-def main(pdf_file=None, cmdline=None,
-         configure_logging=True):
+def get_uri(file):
+    path = os.path.abspath(file)
+    return 'file://%s' % (urllib.parse.quote(path, safe="%/:=&?~#+!$,;'@()*[]"))
+
+
+def startEvince(pdf_file, editor_script):
     logger = logging.getLogger('evince_synctex')
-    if configure_logging:
-        logger.setLevel(logging.DEBUG)
-        logger.addHandler(logging.StreamHandler())
-
-    if not pdf_file:
-        raise ValueError('pdf_file must be provided')
-
-    if not cmdline:
-        cmdline = 'gvim %f +%l'.split()
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler())
 
     import dbus.mainloop.glib
     from gi.repository import GObject as gobject
 
-    pdf_url = 'file://%s' % (
-        urllib.parse.quote(os.path.abspath(pdf_file),
-                           safe="%/:=&?~#+!$,;'@()*[]"))
-    cmdline_string = ' '.join(map(shlex.quote, cmdline))
-
-    process = subprocess.Popen(('evince', pdf_file))
+    editor_command = ' '.join(map(shlex.quote, editor_script))
+    pdf_uri = get_uri(pdf_file)
+    process = subprocess.Popen(('evince', pdf_uri))
 
     try:
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         EvinceWindowProxy.instance = EvinceWindowProxy(
-            pdf_url, cmdline_string, logger)
+            pdf_uri, editor_command, logger)
         try:
             gobject.MainLoop().run()
         except KeyboardInterrupt:
@@ -183,9 +164,13 @@ def main(pdf_file=None, cmdline=None,
         process.wait()
 
 
-def main_parse():
-    main(**vars(parser.parse_args()))
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.lstrip())
+    parser.add_argument('pdf_file', metavar='PDF_FILE')
+    parser.add_argument('editor_script', nargs='+', metavar='EDITOR_SCRIPT',
+                        help='Run command upon Ctrl+Click in Evince')
+    startEvince(**vars(parser.parse_args()))
 
 
 if __name__ == '__main__':
-    main_parse()
+    main()

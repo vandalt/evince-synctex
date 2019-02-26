@@ -16,7 +16,7 @@ setup(
     include_package_data=True,
     license='GPLv3',
     entry_points={
-        'console_scripts': CONSOLE_SCRIPTS,
+        'console_scripts': 'evince-synctex = evince_synctex:main',
     },
     classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',
