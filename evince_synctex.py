@@ -141,7 +141,7 @@ def get_uri(file):
     return 'file://%s' % (urllib.parse.quote(path, safe="%/:=&?~#+!$,;'@()*[]"))
 
 
-def startEvince(line, pdf_file, editor_script):
+def startEvince(line, pdf_file, editor_command):
     logger = logging.getLogger('evince_synctex')
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
@@ -174,8 +174,6 @@ def startEvince(line, pdf_file, editor_script):
             exit(0)
         return True
 
-    editor_command = ' '.join(map(shlex.quote, editor_script))
-
     try:
         EvinceWindowProxy.instance = EvinceWindowProxy(
             pdf_uri, editor_command, logger)
@@ -193,7 +191,7 @@ def main():
     parser.add_argument('-f', '--forward', type=int,
                         dest='line', metavar='LINE')
     parser.add_argument('pdf_file', metavar='PDF_FILE')
-    parser.add_argument('editor_script', nargs='+', metavar='EDITOR_SCRIPT',
+    parser.add_argument('editor_command', metavar='EDITOR_COMMAND',
                         help='Run command upon Ctrl+Click in Evince')
     startEvince(**vars(parser.parse_args()))
 
