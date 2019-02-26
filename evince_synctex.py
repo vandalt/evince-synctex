@@ -20,7 +20,7 @@
 # Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 """
-Provides SyncTeX support for Evince with any editor.
+Provides a command-line-friendly SyncTeX integration for Evince.
 """
 
 import os

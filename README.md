@@ -1,21 +1,24 @@
-SyncTeX backwards search
-========================
+# evince-synctex
 
-To install: `pip3 install --user https://github.com/Mortal/evince-synctex/archive/master.zip`
+This script wraps [Evince](https://wiki.gnome.org/Apps/Evince) to provide a command-line-friendly SyncTeX integration.
+It is based on [Mortal/evince-synctex](https://github.com/Mortal/evince-synctex).
 
-Example: `evince_synctex.py -v file.pdf -- gvim %f +%l`
+## Installation
 
-Launches Evince to `file.pdf`. If the LaTeX source was compiled with
-`--synctex=1`, then you can Ctrl-Click a word in Evince to launch GVim to the
-corresponding line in the source.
+A [Python 3](https://www.python.org/downloads) installation is required. To install the latest version, run the following command:
 
-You can pass a TeX source file to `-s` (`--build-source`)
-to run `latexmk --synctex=1 -pvc -view=none -pdf` on the source file,
-that is, to continuously build the source file in the background.
+```shell
+pip3 install --user https://github.com/efoerster/evince-synctex/archive/master.zip
+```
 
-Tip: If you want to run Vim in the terminal, continuously build the source file,
-and center the line in the Vim window when Vim is launched, use
-`evince_synctex.py -s file.tex -v file.pdf -- gnome-terminal --window -- vim %f +%l +'norm zz'`,
-or simply run the included helper `latexedit file.tex`.
+## Usage
 
-Based on [gauteh/vim-evince-synctex](https://github.com/gauteh/vim-evince-synctex).
+```shell
+evince-synctex PDF_FILE EDITOR_COMMAND
+```
+
+This command opens the specified file in Evince and executes the given editor command on a backwards search. A forward search can be performed by using the `-f` flag:
+
+```shell
+evince-synctex -f LINE PDF_FILE EDITOR_COMMAND
+```
