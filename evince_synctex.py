@@ -156,7 +156,7 @@ def startEvince(line, pdf_file, editor_command):
     already_opened = daemon.FindDocument(
         pdf_uri, False, dbus_interface=EV_DAEMON_IFACE)
 
-    if (line is not None):
+    if (line is not None and already_opened):
         tex_file = os.path.splitext(pdf_file)[0] + '.tex'
         dbus_name = daemon.FindDocument(
             pdf_uri, True, dbus_interface=EV_DAEMON_IFACE)
